@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<style>
+#container {
+  width: 200px;
+  height: 200px;
+  position: relative;
+  background: black;
+}
+.block {
+  width: 48px;
+  height: 48px;
+  color: white;
+  text-align:center;
+  line-height: 50px;
+  position: absolute;
+  background: red;
+  border-radius: 5px;
+  border-color: black;
+  border-width: 1px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 25px;
+}
+
+</style>
+
+<body>
+
+<p>15-block puzzle program written in Javascript</p>
+
+<div id="container">
+<div id="b00" class="block" style="top:1px;   left:1px;"  onClick="moveBlock(0,0)"></div>
+<div id="b01" class="block" style="top:1px;   left:51px; " onClick="moveBlock(0,1)"></div>
+<div id="b02" class="block" style="top:1px;   left:101px;" onClick="moveBlock(0,2)"></div>
+<div id="b03" class="block" style="top:1px;   left:151px;" onClick="moveBlock(0,3)"></div>
+<div id="b10" class="block" style="top:51px;  left:1px;  " onClick="moveBlock(1,0)"></div>
+<div id="b11" class="block" style="top:51px;  left:51px  " onClick="moveBlock(1,1)"></div>
+<div id="b12" class="block" style="top:51px;  left:101px;" onClick="moveBlock(1,2)"></div>
+<div id="b13" class="block" style="top:51px;  left:151px;" onClick="moveBlock(1,3)"></div>
+<div id="b20" class="block" style="top:101px; left:1px;  " onClick="moveBlock(2,0)"></div>
+<div id="b21" class="block" style="top:101px; left:51px; " onClick="moveBlock(2,1)"></div>
+<div id="b22" class="block" style="top:101px; left:101px;" onClick="moveBlock(2,2)"></div>
+<div id="b23" class="block" style="top:101px; left:151px " onClick="moveBlock(2,3)"></div>
+<div id="b30" class="block" style="top:151px; left:1px;  " onClick="moveBlock(3,0)"></div>
+<div id="b31" class="block" style="top:151px; left:51px; " onClick="moveBlock(3,1)"></div>
+<div id="b32" class="block" style="top:151px; left:101px " onClick="moveBlock(3,2)"></div>
+<div id="b33" class="block" style="top:151px; left:151px;" onClick="moveBlock(3,3)"></div>
+</div>
+
+<button onclick="mixEmUp()">Start Game</button>
+
+<p id="demo"></p>
+<script>
+var blocks = [[1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,0]];
+var finished = false;
+drawBoard();
+
+function drawBoard() {
+    for (var i=0; i<4; i++) {
+        for (var j=0; j<4; j++) {
+            var block = "b" + i + j;
+            if (blocks[i][j] != 0) {
+                document.getElementById(block).innerHTML = blocks[i][j];
+                document.getElementById(block).style.backgroundColor = "red";
+            }
+	    else {
+                document.getElementById(block).innerHTML = "";
+                document.getElementById(block).style.backgroundColor = "black";
+            }
+        }
+    }
+}
+function mixEmUp() {
+    document.getElementById("demo").innerHTML = "Game is started.";
+
+    // mix up the array using the Fisher-Yates algorithm
+    var tempArray = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
+    var currentIndex = tempArray.length, temporaryValue, randomIndex;
+
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
+
+        // Pick a remaining element...
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+
+        // And swap it with the current element.
+        temporaryValue = tempArray[currentIndex];
+        tempArray[currentIndex] = tempArray[randomIndex];
+        tempArray[randomIndex] = temporaryValue;
+    }
+
+    // Now use your randomized indicies to repopulate the 2d array
+    tempArrayIndex = 0;
+    for (var i=0; i<4; i++) {
+        for (var j=0; j<4; j++) {
+            blocks[i][j] = tempArray[tempArrayIndex];
+            tempArrayIndex++;
+        }
+    }
+
+    // redraw the game board
+    drawBoard();
+    // set finished = false
+    if (finished == true) {
+       finished = false;
+    }
+}
+
+function swapBlocks(oldX,oldy,newX,newY) {
+   var tempVal = blocks[oldX][oldY];
+   blocks[oldX][oldY] = blocks[newX][newY];
+   blocks[newX][newY] = tempVal;
+   drawBoard();
+}
+
+function moveBlock(x,y) {
+  //check the adjacent blocks for a possible move
+  //left
+  if (x>0 && blocks[x-1][y] == 0){
+   var tempVal = blocks[x][y];
+   blocks[x][y] = blocks[x-1][y];
+   blocks[x-1][y] = tempVal;
+   drawBoard();
+   checkSolution();
+  }
+  //above
+  else if (y>0 && blocks[x][y-1] == 0) {
+   var tempVal = blocks[x][y];
+   blocks[x][y] = blocks[x][y-1];
+   blocks[x][y-1] = tempVal;
+   drawBoard();
+   checkSolution();
+  }
+  //right
+  else if (x<3 && blocks[x+1][y] == 0) {
+   var tempVal = blocks[x][y];
+   blocks[x][y] = blocks[x+1][y];
+   blocks[x+1][y] = tempVal;
+   drawBoard();
+   checkSolution();
+  }
+  //below
+  else if (y<3 && blocks [x][y+1] == 0) {
+   var tempVal = blocks[x][y];
+   blocks[x][y] = blocks[x][y+1];
+   blocks[x][y+1] = tempVal;
+   drawBoard();
+   checkSolution();
+  }
+  else { 
+      document.getElementById("demo").innerHTML = 
+          "this block cannot be moved.";
+  }
+}
+
+function checkSolution() {
+  var incr = 1;
+  for (var i=0; i<4; i++) {
+    for (var j=0; j<4; j++) {
+      if (incr == 16) {
+         incr = 0;
+      }
+      if (blocks[i][j] != incr) {
+         return;
+      }
+      else {
+         incr++;
+      }
+    }
+  }
+  document.getElementById("demo").innerHTML = "You win!";
+}
+
+</script>
+
+</body>
+</html>
+
